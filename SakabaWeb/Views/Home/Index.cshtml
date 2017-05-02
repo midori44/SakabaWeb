@@ -1,0 +1,165 @@
+﻿@model SakabaWeb.HomeFormModel
+@{
+    ViewBag.Title = "Boss召喚コマンド";
+}
+@section Scripts {
+$('.ajaxUpload').on('change', function (e) {
+    var target = e.target;
+    var file = target.files[0];
+    if (!file) {
+        return;
+    }
+    var data = new FormData();
+    data.append("file", file);
+    var imgArea = $(".imgArea[data-index=" + index + "]");
+    var hiddenForm = $("#Image" + index + "Path");
+    // POSTでアップロード
+    $.ajax({
+        type: "POST",
+        data: data,
+        url: "/" + account + "/MyGroup/Concert/ImageUpload",
+        cache: false,
+        processData: false,
+        contentType: false,
+        beforeSend: function () {
+            imgArea.empty();
+            imgArea.append($("<i></i>").addClass("fa fa-spinner fa-pulse"));
+            hiddenForm.val(null);
+        },
+        success: function (data) {
+            imgArea.empty();
+            if (data.Success) {
+                hiddenForm.val(data.Path);
+                imgArea.append($("<img>").attr("src", "/" + data.ThumbnailPath).addClass("img-thumbnail"));
+                imgArea.append($("<button></button>").attr("type", "button").addClass("clear btn btn-sm btn-default").attr("data-index", index).text("削除"));
+            }
+            else {
+                imgArea.append($("<span></span>").addClass("text-danger").text(data.Message));
+            }
+        },
+        error: function () {
+            imgArea.empty();
+        },
+        complete: function () {
+        }
+    });
+});
+}
+
+<h3>@ViewBag.Title</h3>
+<p>ボスモンスターを召喚します。</p>
+@using (Html.BeginForm("Index", "Home", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+        <div class="form-group">
+            <label class="control-label col-sm-3" for="Name">モンスターの名前 <span class="label label-danger">必須</span></label>
+            <div class="col-sm-9">
+                @Html.TextBoxFor(model => model.Name, new { @class = "form-control", required = true })
+                @Html.ValidationMessageFor(model => model.Name, "", new { @class = "text-danger" })
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label col-sm-3" for="uploadFiles">アイコン画像</label>
+            <div class="col-sm-9">
+                <input type="file" name="file" />
+                @Html.ValidationMessage("file", "", new { @class = "text-danger" })
+                <div>
+                    未指定のときはデフォルト画像を使用します。<br />
+                    既存ゲームキャラクターの流用はなるべくお控えください。
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="control-label col-sm-3" for="VoiceAppear">登場時ボイス <span class="label label-danger">必須</span></label>
+            <div class="col-sm-9">
+                @Html.TextBoxFor(model => model.VoiceAppear, new { @class = "form-control", required = true })
+                @Html.ValidationMessageFor(model => model.VoiceAppear, "", new { @class = "text-danger" })
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label col-sm-3" for="VoiceDamage">被ダメージ時ボイス <span class="label label-danger">必須</span></label>
+            <div class="col-sm-9">
+                @Html.TextBoxFor(model => model.VoiceDamage, new { @class = "form-control", required = true })
+                @Html.ValidationMessageFor(model => model.VoiceDamage, "", new { @class = "text-danger" })
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label col-sm-3" for="VoiceCounter">反撃時ボイス <span class="label label-danger">必須</span></label>
+            <div class="col-sm-9">
+                @Html.TextBoxFor(model => model.VoiceCounter, new { @class = "form-control", required = true })
+                @Html.ValidationMessageFor(model => model.VoiceCounter, "", new { @class = "text-danger" })
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label col-sm-3" for="VoiceDead">死亡時ボイス <span class="label label-danger">必須</span></label>
+            <div class="col-sm-9">
+                @Html.TextBoxFor(model => model.VoiceDead, new { @class = "form-control", required = true })
+                @Html.ValidationMessageFor(model => model.VoiceDead, "", new { @class = "text-danger" })
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label col-sm-3" for="DropItem">ドロップアイテム</label>
+            <div class="col-sm-9">
+                @Html.TextBoxFor(model => model.DropItem, new { @class = "form-control" })
+                @Html.ValidationMessageFor(model => model.DropItem, "", new { @class = "text-danger" })
+                <div>
+                    倒した際に落とすアイテムを指定できます。<br />
+                    戦闘後の会話を盛り上げるのに使用してください。
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="control-label col-sm-3" for="LifePoint">ライフポイント <span class="label label-danger">必須</span></label>
+            <div class="col-sm-9">
+                @Html.TextBoxFor(model => model.LifePoint, new { @class = "form-control", type = "Number", required = true, min = 1, max = 100, style = "width:120px" })
+                @Html.ValidationMessageFor(model => model.LifePoint, "", new { @class = "text-danger" })
+                <div>
+                    リプライによるダメージを何回与えれば倒せるかを指定します。<br />
+                    設定が高いと倒せなくなる恐れがあるので注意してください（10以下を推奨）。
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label col-sm-3" for="EvadeRate">回避率 <span class="label label-danger">必須</span></label>
+            <div class="col-sm-9">
+                <div class="input-group" style="width:120px">
+                    @Html.TextBoxFor(model => model.EvadeRate, new { @class = "form-control", type = "Number", required = true, min = 0, max = 90 })
+                    <span class="input-group-addon" style="background-color:#eee">%</span>
+                </div>
+                @Html.ValidationMessageFor(model => model.EvadeRate, "", new { @class = "text-danger" })
+                <div>
+                    リプライでダメージを与えられる確率を指定します。<br />
+                    （回避が成功した場合は「○○は攻撃を回避した」と表示されます）<br />
+                    設定が高いと倒せなくなる恐れがあるので注意してください（20%以下を推奨）。
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label col-sm-3" for="Weakness">弱点</label>
+            <div class="col-sm-9">
+                @Html.TextAreaFor(model => model.Weakness, 6, 40, new { @class = "form-control" })
+                @Html.ValidationMessageFor(model => model.Weakness, "", new { @class = "text-danger" })
+                <div>
+                    【上級者向け】特定ワードを含むリプライのときのみダメージを与えられるようにできます。<br />
+                    （それ以外のリプライに対しては「ダメージを与えられない」と表示されます）<br />
+                    例えば火に弱くしたい場合は 火, 炎, ファイア などを 改行区切り で入力してください。<br />
+                    指定する場合は、戦闘中にヒントを出すなどのサポートをお願いします。
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-sm-offset-3 col-sm-9">
+                <input type="submit" value="送信" class="btn btn-primary" />
+            </div>
+        </div>
+
+    </div>
+}
+
