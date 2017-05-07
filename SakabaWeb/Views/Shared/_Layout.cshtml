@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@ViewBag.Title - マイ ASP.NET アプリケーション</title>
+    <title>@ViewBag.Title - マストドン酒場</title>
     @Styles.Render("~/Content/css")
     @Scripts.Render("~/bundles/modernizr")
 </head>
@@ -17,22 +17,35 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                @Html.ActionLink("C", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
+                @Html.ActionLink("マストドン酒場", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
             </div>
-            <div class="navbar-collapse collapse">
+            @*<div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">
                     <li>@Html.ActionLink("ホーム", "Index", "Home")</li>
                     <li>@Html.ActionLink("詳細", "About", "Home")</li>
                     <li>@Html.ActionLink("連絡先", "Contact", "Home")</li>
                 </ul>
-            </div>
+            </div>*@
         </div>
     </div>
     <div class="container body-content">
+        @if (TempData.ContainsKey("Success"))
+        {
+            <div class="alert alert-success" style="margin-top:10px">
+                @TempData["Success"]
+            </div>
+        }
+        @if (TempData.ContainsKey("Error"))
+        {
+            <div class="alert alert-danger" style="margin-top:10px">
+                @TempData["Error"]
+            </div>
+        }
+
         @RenderBody()
         <hr />
         <footer>
-            <p>&copy; @DateTime.Now.Year - マイ ASP.NET アプリケーション</p>
+            <p>&copy; @DateTime.Now.Year - sakaba.space</p>
         </footer>
     </div>
 

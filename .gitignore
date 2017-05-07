@@ -294,3 +294,4 @@ Web.Release.config
 mysetting.config
 /AppMvc/App_Data/log4net
 /AppMvc/App_Data/Google.Apis.Auth
+/SakabaWeb/exe

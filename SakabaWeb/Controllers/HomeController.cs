@@ -1,8 +1,11 @@
 ﻿using ImageResizer;
+using log4net;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Text;
 using System.Web;
 using System.Web.Mvc;
 
@@ -10,14 +13,17 @@ namespace SakabaWeb.Controllers
 {
     public class HomeController : Controller
     {
+        private ILog Logger => LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+
         public ActionResult Index()
         {
-            return View(new HomeFormModel());
+            return View(new BossFormModel());
         }
         [HttpPost]
-        public ActionResult Index(HomeFormModel formModel, HttpPostedFileBase file)
+        public ActionResult Index(BossFormModel formModel, HttpPostedFileBase file)
         {
             //return View(formModel);
+            string physicalPath = Server.MapPath($"~/img/default.png");
             if (file != null)
             {
                 var preUploadChecker = new PreUploadChecker(file);
@@ -28,17 +34,45 @@ namespace SakabaWeb.Controllers
                 }
 
                 string guid = Guid.NewGuid().ToString("N");
-                string extension = System.IO.Path.GetExtension(file.FileName).ToLower();
+                string extension = Path.GetExtension(file.FileName).ToLower();
                 string imgPath = $"img/{guid}{extension}";
 
-                string physicalPath = Server.MapPath($"~/{imgPath}");
+                physicalPath = Server.MapPath($"~/{imgPath}");
                 ImageSave(file, physicalPath, 120);
+                Logger.Info(physicalPath);
             }
 
+            string args = ToArgString(new string[] {
+                formModel.Name,
+                physicalPath,
+                formModel.LifePoint.ToString(),
+                formModel.EvadeRate.ToString(),
+                formModel.VoiceAppear,
+                formModel.VoiceDamage,
+                formModel.VoiceCounter,
+                formModel.VoiceDead,
+                formModel.DropItem,
+                formModel.Weakness
+            });
+            Logger.Info(args);
 
+            try
+            {
+                string exe = Server.MapPath($"~/exe/SakabaConsole.exe");
+                System.Diagnostics.Process.Start(exe, args);
+
+                TempData["Success"] = "登録が完了しました。数分待ってもタイムライン上に表示されない場合は管理者までお問い合わせください。";
+                Logger.Info("登録完了");
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = "エラーが発生しました。管理者までお問い合わせください。";
+                Logger.Fatal(ex);
+            }
 
             return RedirectToAction(nameof(Index));
         }
+
 
 
 
@@ -80,6 +114,16 @@ namespace SakabaWeb.Controllers
                 CreateParentDirectory = true
             };
             imageJob.Build();
+        }
+
+        private string ToArgString(string[] args)
+        {
+            var sb = new StringBuilder();
+            foreach (var item in args)
+            {
+                sb.Append($"\"{item?.Replace("\"", "\\\"").Trim()}\" ");
+            }
+            return sb.ToString();
         }
     }
 }

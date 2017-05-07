@@ -1,0 +1,11 @@
+﻿#sakaba {
+    background-color: #eee;
+    margin: 5px 10px;
+    padding: 4px;
+    border-radius: 2px;
+    color: #333;
+}
+.sakaba-info h3 {
+    font-size: 17px;
+    margin-bottom: 8px;
+}
