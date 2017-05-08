@@ -1,7 +1,7 @@
 ﻿using ImageResizer;
 using log4net;
 using System;
-using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -22,7 +22,6 @@ namespace SakabaWeb.Controllers
         [HttpPost]
         public ActionResult Index(BossFormModel formModel, HttpPostedFileBase file)
         {
-            //return View(formModel);
             string physicalPath = Server.MapPath($"~/img/default.png");
             if (file != null)
             {
@@ -30,6 +29,7 @@ namespace SakabaWeb.Controllers
                 if (preUploadChecker.HasError)
                 {
                     ModelState.AddModelError("file", preUploadChecker.ErrorMessage);
+                    Logger.Warn(preUploadChecker.ErrorMessage);
                     return View(formModel);
                 }
 
@@ -56,10 +56,17 @@ namespace SakabaWeb.Controllers
             });
             Logger.Info(args);
 
+            if (Process.GetProcessesByName("SakabaConsole").Length > 0)
+            {
+                TempData["Error"] = "他のプレイヤーによるボスモンスターが出現中です。終了までお待ちください。";
+                Logger.Warn("二重実行");
+                return View(formModel);
+            }
+            
             try
             {
                 string exe = Server.MapPath($"~/exe/SakabaConsole.exe");
-                System.Diagnostics.Process.Start(exe, args);
+                Process.Start(exe, args);
 
                 TempData["Success"] = "登録が完了しました。数分待ってもタイムライン上に表示されない場合は管理者までお問い合わせください。";
                 Logger.Info("登録完了");
@@ -68,6 +75,7 @@ namespace SakabaWeb.Controllers
             {
                 TempData["Error"] = "エラーが発生しました。管理者までお問い合わせください。";
                 Logger.Fatal(ex);
+                return View(formModel);
             }
 
             return RedirectToAction(nameof(Index));
