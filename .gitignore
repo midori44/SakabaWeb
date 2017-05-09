@@ -295,3 +295,4 @@ mysetting.config
 /AppMvc/App_Data/log4net
 /AppMvc/App_Data/Google.Apis.Auth
 /SakabaWeb/exe
+/SakabaConsole/Constant.cs
