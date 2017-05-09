@@ -118,7 +118,7 @@ namespace SakabaConsole
                         .AppendLine($"{Boss.VoiceDead}")
                         .AppendLine($"> {GetName(status.Account)}「{content}」")
                         .ToString();
-                    await MastodonClient.PostStatus(dead, Visibility.Public);
+                    await MastodonClient.PostStatus(dead, Visibility.Public, mediaIds: mediaIds);
 
                     await End(true);
                     return;
@@ -169,6 +169,15 @@ namespace SakabaConsole
 
                     string result = builder.ToString();
                     await record.MastodonClient.PostStatus(result, Visibility.Public);
+
+
+                    //using (var inFile = new FileStream("dead.jpg", FileMode.Open, FileAccess.Read))
+                    //{
+                    //    var bs = new byte[inFile.Length];
+                    //    int readBytes = inFile.Read(bs, 0, (int)inFile.Length);
+                    //    string base64String = Convert.ToBase64String(bs);
+                    //    await MastodonClient.UpdateCredentials(avatar: $"data:image/jpg;base64,{base64String}");
+                    //}
                 }
                 else
                 {
